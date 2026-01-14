@@ -4731,7 +4731,7 @@ function startQrScanning() {
     ctx.drawImage(wearableCamera, 0, 0);
 
     try {
-      // Use BarcodeDetector API if available
+      // Try BarcodeDetector API first (Chrome/Edge)
       if ("BarcodeDetector" in window) {
         const detector = new BarcodeDetector({ formats: ["qr_code"] });
         const barcodes = await detector.detect(canvas);
@@ -4739,10 +4739,25 @@ function startQrScanning() {
         if (barcodes.length > 0) {
           const qrData = barcodes[0].rawValue;
           handleQrCodeScanned(qrData);
+          return;
         }
       }
     } catch (error) {
-      // BarcodeDetector not available or failed, continue scanning
+      // BarcodeDetector failed, fall through to jsQR
+    }
+
+    // Fallback to jsQR library (works in all browsers)
+    try {
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "dontInvert",
+      });
+
+      if (code) {
+        handleQrCodeScanned(code.data);
+      }
+    } catch (error) {
+      console.error("jsQR error:", error);
     }
   }, 200);
 }
