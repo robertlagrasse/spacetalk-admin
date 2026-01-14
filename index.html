@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spacetalk - AI-Powered Push-to-Talk Platform</title>
+    <meta name="description" content="Enterprise push-to-talk with real-time AI translation across 19 languages and intelligent message routing.">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="gradient-bg"></div>
+
+    <header class="site-header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">&#9673;</span>
+                <span class="logo-text">Spacetalk</span>
+            </div>
+            <nav class="tab-nav">
+                <button id="tab-product" class="tab active" data-tab="product">Product</button>
+                <button id="tab-investor" class="tab" data-tab="investor">Investors</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Tab 1: Product Overview -->
+        <section id="product-content" class="tab-content active">
+
+            <!-- Hero Section -->
+            <section class="hero">
+                <div class="hero-badge">AI-Powered PTT Platform</div>
+                <h1 class="hero-title">Push-to-Talk That Speaks<br><span class="gradient-text">Every Language</span></h1>
+                <p class="hero-subtitle">Real-time translation across 19 languages. Intelligent message routing powered by AI. Unlimited scale for enterprise teams.</p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-value" data-count="19">19</span>
+                        <span class="stat-label">Languages</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">Real-time</span>
+                        <span class="stat-label">Translation</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">Unlimited</span>
+                        <span class="stat-label">Scale</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Features Section -->
+            <section class="features-section">
+                <h2 class="section-title">AI-Native Capabilities</h2>
+                <p class="section-subtitle">Every message is transcribed, translated, and analyzed in real-time</p>
+
+                <div class="features-grid">
+                    <div class="feature-card ai-feature">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2a10 10 0 1 0 10 10H12V2z"/>
+                                <path d="M12 2a10 10 0 0 1 10 10"/>
+                                <circle cx="12" cy="12" r="6"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Real-Time Translation</h3>
+                        <p class="feature-desc">Every voice message is automatically transcribed and translated on-the-fly. Users hear messages in their preferred language via AI-generated speech.</p>
+                        <div class="feature-details">
+                            <span class="detail-tag">19 Languages</span>
+                            <span class="detail-tag">GPT-4o-mini</span>
+                            <span class="detail-tag">TTS Playback</span>
+                        </div>
+                    </div>
+
+                    <div class="feature-card ai-feature">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Intelligent Message Routing</h3>
+                        <p class="feature-desc">AI analyzes message content in real-time and automatically routes critical conversations to the right people based on semantic meaning.</p>
+                        <div class="feature-details">
+                            <span class="detail-tag">Claude AI</span>
+                            <span class="detail-tag">Semantic Matching</span>
+                            <span class="detail-tag">Auto-Routing</span>
+                        </div>
+                    </div>
+
+                    <div class="feature-card ai-feature">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Personal Alerts (BOLOs)</h3>
+                        <p class="feature-desc">Set up personal "Be On Look Out" alerts. Get notified when AI detects conversations matching topics you care about across any channel.</p>
+                        <div class="feature-details">
+                            <span class="detail-tag">Personal Rules</span>
+                            <span class="detail-tag">Cross-Channel</span>
+                            <span class="detail-tag">Instant Alerts</span>
+                        </div>
+                    </div>
+
+                    <div class="feature-card ai-feature">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M3 9h18"/>
+                                <path d="M9 21V9"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Transcription & Search</h3>
+                        <p class="feature-desc">Every message is transcribed automatically. Search through voice conversations by text. Full transcripts available for review and compliance.</p>
+                        <div class="feature-details">
+                            <span class="detail-tag">AWS Transcribe</span>
+                            <span class="detail-tag">Searchable</span>
+                            <span class="detail-tag">Audit Trail</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Enterprise Features Section -->
+            <section class="features-section">
+                <h2 class="section-title">Enterprise-Grade Platform</h2>
+                <p class="section-subtitle">Built for scale, security, and reliability</p>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                <path d="M2 17l10 5 10-5"/>
+                                <path d="M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Unlimited Scale</h3>
+                        <p class="feature-desc">Serverless architecture handles any number of users, talk groups, and tenants. No per-seat infrastructure constraints.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="2" y1="12" x2="22" y2="12"/>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Satellite Optimized</h3>
+                        <p class="feature-desc">Adaptive polling modes handle high-latency satellite connections. Works seamlessly on Starlink, cellular, or any network.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Geo-Fencing</h3>
+                        <p class="feature-desc">Location-aware channel access. Users automatically gain access to channels when they enter designated geographic zones.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Multi-Tenant</h3>
+                        <p class="feature-desc">Complete tenant isolation at the database level. Federation enables controlled cross-organization communication when needed.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Platform Components -->
+            <section class="components-section">
+                <h2 class="section-title">Complete Platform</h2>
+                <div class="components-grid">
+                    <div class="component-card">
+                        <div class="component-header">
+                            <span class="component-icon">&#9898;</span>
+                            <h3>Mobile App</h3>
+                        </div>
+                        <ul class="component-list">
+                            <li>Flutter (iOS / Android / Web)</li>
+                            <li>Push-to-talk interface</li>
+                            <li>Real-time location tracking</li>
+                            <li>Background polling</li>
+                        </ul>
+                    </div>
+                    <div class="component-card">
+                        <div class="component-header">
+                            <span class="component-icon">&#9899;</span>
+                            <h3>Admin Consoles</h3>
+                        </div>
+                        <ul class="component-list">
+                            <li>Dispatch Console</li>
+                            <li>Tenant Administration</li>
+                            <li>Platform Administration</li>
+                            <li>Real-time monitoring</li>
+                        </ul>
+                    </div>
+                    <div class="component-card">
+                        <div class="component-header">
+                            <span class="component-icon">&#9900;</span>
+                            <h3>Serverless Backend</h3>
+                        </div>
+                        <ul class="component-list">
+                            <li>92 Lambda handlers</li>
+                            <li>DynamoDB (19 tables)</li>
+                            <li>S3 audio storage</li>
+                            <li>API Gateway</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </section>
+
+        <!-- Tab 2: Investor Info -->
+        <section id="investor-content" class="tab-content">
+
+            <!-- Investor Hero -->
+            <section class="hero investor-hero">
+                <div class="hero-badge">Investment Opportunity</div>
+                <h1 class="hero-title">AI-Native PTT in a<br><span class="gradient-text">Pre-LLM Market</span></h1>
+                <p class="hero-subtitle">Legacy push-to-talk systems can't do AI. Spacetalk was built from day one with AI at its core&mdash;creating a generational opportunity.</p>
+            </section>
+
+            <!-- Market Opportunity -->
+            <section class="features-section">
+                <h2 class="section-title">The Opportunity</h2>
+                <div class="opportunity-grid">
+                    <div class="opportunity-card">
+                        <div class="opp-icon">&#128640;</div>
+                        <h3>Legacy Systems Are Stuck</h3>
+                        <p>Existing PTT platforms were built before the LLM era. They can't easily add AI capabilities without rebuilding from scratch.</p>
+                    </div>
+                    <div class="opportunity-card">
+                        <div class="opp-icon">&#128752;</div>
+                        <h3>Satellite Is Exploding</h3>
+                        <p>Starlink, AST SpaceMobile, and new LEO constellations are creating demand for apps optimized for high-latency connections.</p>
+                    </div>
+                    <div class="opportunity-card">
+                        <div class="opp-icon">&#127760;</div>
+                        <h3>Workforces Are Globalizing</h3>
+                        <p>Frontline workers increasingly span multiple languages. Real-time translation is becoming essential, not optional.</p>
+                    </div>
+                    <div class="opportunity-card">
+                        <div class="opp-icon">&#129302;</div>
+                        <h3>AI Routing Is Unmet</h3>
+                        <p>Enterprise demand for intelligent message routing&mdash;getting the right information to the right people automatically&mdash;is growing fast.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Target Acquirers -->
+            <section class="features-section">
+                <h2 class="section-title">Target Acquirers</h2>
+                <p class="section-subtitle">Multiple buyer categories with strong strategic fit</p>
+
+                <div class="acquirers-grid">
+                    <div class="acquirer-card">
+                        <h3>Telcos</h3>
+                        <p>White-label AI-powered PTT as a new enterprise revenue stream. Differentiate from commodity voice services.</p>
+                    </div>
+                    <div class="acquirer-card">
+                        <h3>PTT Hardware Manufacturers</h3>
+                        <p>Modern software stack for next-generation rugged devices. Compete with software-only players.</p>
+                    </div>
+                    <div class="acquirer-card">
+                        <h3>Legacy PTT Players</h3>
+                        <p>Leapfrog competitors with AI capabilities. Faster than rebuilding existing platforms.</p>
+                    </div>
+                    <div class="acquirer-card">
+                        <h3>UCaaS Providers</h3>
+                        <p>Add differentiated PTT to existing unified communications suite. Expand into frontline workers.</p>
+                    </div>
+                    <div class="acquirer-card">
+                        <h3>Satellite Companies</h3>
+                        <p>Optimized application for high-latency LEO constellations. Drive adoption of connectivity services.</p>
+                    </div>
+                    <div class="acquirer-card">
+                        <h3>Private Equity</h3>
+                        <p>Platform for roll-up strategy in industrial communications. Modern foundation for acquisitions.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Technical Differentiation -->
+            <section class="features-section">
+                <h2 class="section-title">Technical Differentiation</h2>
+
+                <div class="diff-grid">
+                    <div class="diff-card">
+                        <h3>AI-Native Architecture</h3>
+                        <div class="diff-content">
+                            <div class="diff-item">
+                                <span class="diff-label">Semantic Analysis</span>
+                                <span class="diff-value">Claude Haiku via AWS Bedrock</span>
+                            </div>
+                            <div class="diff-item">
+                                <span class="diff-label">Translation</span>
+                                <span class="diff-value">OpenAI GPT-4o-mini</span>
+                            </div>
+                            <div class="diff-item">
+                                <span class="diff-label">Text-to-Speech</span>
+                                <span class="diff-value">OpenAI TTS-1</span>
+                            </div>
+                            <div class="diff-item">
+                                <span class="diff-label">Transcription</span>
+                                <span class="diff-value">AWS Transcribe</span>
+                            </div>
+                        </div>
+                        <p class="diff-note">AI is core to the platform, not bolted on.</p>
+                    </div>
+
+                    <div class="diff-card">
+                        <h3>Serverless & Scalable</h3>
+                        <div class="diff-content">
+                            <div class="diff-item">
+                                <span class="diff-label">Compute</span>
+                                <span class="diff-value">92 Lambda handlers</span>
+                            </div>
+                            <div class="diff-item">
+                                <span class="diff-label">Database</span>
+                                <span class="diff-value">DynamoDB on-demand</span>
+                            </div>
+                            <div class="diff-item">
+                                <span class="diff-label">Storage</span>
+                                <span class="diff-value">S3 with lifecycle</span>
+                            </div>
+                            <div class="diff-item">
+                                <span class="diff-label">API</span>
+                                <span class="diff-value">API Gateway HTTP</span>
+                            </div>
+                        </div>
+                        <p class="diff-note">Zero ops burden. Scales to zero when idle.</p>
+                    </div>
+
+                    <div class="diff-card">
+                        <h3>Satellite-First Design</h3>
+                        <div class="diff-content">
+                            <div class="diff-item">
+                                <span class="diff-label">Polling</span>
+                                <span class="diff-value">Cursor-based, handles 2s+ latency</span>
+                            </div>
+                            <div class="diff-item">
+                                <span class="diff-label">Modes</span>
+                                <span class="diff-value">Adaptive CELL/SAT switching</span>
+                            </div>
+                            <div class="diff-item">
+                                <span class="diff-label">Codec</span>
+                                <span class="diff-value">Opus for bandwidth efficiency</span>
+                            </div>
+                            <div class="diff-item">
+                                <span class="diff-label">Network</span>
+                                <span class="diff-value">Any IP connectivity</span>
+                            </div>
+                        </div>
+                        <p class="diff-note">Works on Starlink, cellular, WiFi, or satellite.</p>
+                    </div>
+
+                    <div class="diff-card">
+                        <h3>Multi-Tenant by Design</h3>
+                        <div class="diff-content">
+                            <div class="diff-item">
+                                <span class="diff-label">Isolation</span>
+                                <span class="diff-value">Database-level separation</span>
+                            </div>
+                            <div class="diff-item">
+                                <span class="diff-label">Federation</span>
+                                <span class="diff-value">Controlled cross-tenant comms</span>
+                            </div>
+                            <div class="diff-item">
+                                <span class="diff-label">Config</span>
+                                <span class="diff-value">Per-tenant settings</span>
+                            </div>
+                            <div class="diff-item">
+                                <span class="diff-label">Auth</span>
+                                <span class="diff-value">Cognito SSO + API keys</span>
+                            </div>
+                        </div>
+                        <p class="diff-note">Ready for white-label or SaaS deployment.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- What You're Acquiring -->
+            <section class="features-section">
+                <h2 class="section-title">What You're Acquiring</h2>
+
+                <div class="assets-grid">
+                    <div class="asset-item">
+                        <span class="asset-value">92</span>
+                        <span class="asset-label">Lambda Handlers</span>
+                    </div>
+                    <div class="asset-item">
+                        <span class="asset-value">19</span>
+                        <span class="asset-label">DynamoDB Tables</span>
+                    </div>
+                    <div class="asset-item">
+                        <span class="asset-value">3</span>
+                        <span class="asset-label">Admin Consoles</span>
+                    </div>
+                    <div class="asset-item">
+                        <span class="asset-value">1</span>
+                        <span class="asset-label">Mobile App (3 platforms)</span>
+                    </div>
+                </div>
+
+                <div class="assets-details">
+                    <div class="asset-detail">
+                        <h4>Infrastructure as Code</h4>
+                        <p>Complete Terraform configuration for reproducible AWS deployment</p>
+                    </div>
+                    <div class="asset-detail">
+                        <h4>API Documentation</h4>
+                        <p>OpenAPI specification covering all endpoints</p>
+                    </div>
+                    <div class="asset-detail">
+                        <h4>AI Integrations</h4>
+                        <p>Production integrations with Bedrock, OpenAI, and AWS Transcribe</p>
+                    </div>
+                    <div class="asset-detail">
+                        <h4>Modern Stack</h4>
+                        <p>TypeScript backend, Flutter mobile, React admin consoles</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Expansion Opportunities -->
+            <section class="features-section">
+                <h2 class="section-title">Expansion Opportunities</h2>
+                <div class="expansion-grid">
+                    <div class="expansion-item">
+                        <span class="expansion-icon">&#128274;</span>
+                        <h4>Enterprise Compliance</h4>
+                        <p>SOC2, HIPAA, FedRAMP certification</p>
+                    </div>
+                    <div class="expansion-item">
+                        <span class="expansion-icon">&#128187;</span>
+                        <h4>Desktop Clients</h4>
+                        <p>Electron apps for Windows/Mac/Linux</p>
+                    </div>
+                    <div class="expansion-item">
+                        <span class="expansion-icon">&#128225;</span>
+                        <h4>Hardware Partnerships</h4>
+                        <p>Dedicated PTT device integrations</p>
+                    </div>
+                    <div class="expansion-item">
+                        <span class="expansion-icon">&#129504;</span>
+                        <h4>Additional AI Features</h4>
+                        <p>Sentiment analysis, threat detection, summaries</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact -->
+            <section class="contact-section">
+                <h2>Let's Talk</h2>
+                <p>Interested in learning more about Spacetalk?</p>
+                <a href="mailto:robert.lagrasse@gmail.com" class="contact-button">Contact Us</a>
+            </section>
+
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <span class="footer-logo">Spacetalk</span>
+            <span class="footer-copy">&copy; 2025</span>
+        </div>
+    </footer>
+
+    <script src="./app.js"></script>
+</body>
+</html>
