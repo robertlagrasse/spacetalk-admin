@@ -13,6 +13,8 @@ const state = {
   sentInvites: [],
   receivedInvites: [],
   federationEntries: [],
+  wearables: [],
+  pendingWearablePairing: null,
   transmissions: [],
   transmissionsCursor: null,
   adminLogs: [],
@@ -55,6 +57,7 @@ const tenantStatus = document.getElementById("tenant-status");
 const logoutButton = document.getElementById("logout");
 const tabUsers = document.getElementById("tab-users");
 const tabGroups = document.getElementById("tab-groups");
+const tabWearables = document.getElementById("tab-wearables");
 const tabFederations = document.getElementById("tab-federations");
 const tabLogs = document.getElementById("tab-logs");
 const tabAdminLogs = document.getElementById("tab-admin-logs");
@@ -67,6 +70,7 @@ const tabBilling = document.getElementById("tab-billing");
 const tabLocationHistory = document.getElementById("tab-location-history");
 const usersTab = document.getElementById("users-tab");
 const groupsTab = document.getElementById("groups-tab");
+const wearablesTab = document.getElementById("wearables-tab");
 const federationsTab = document.getElementById("federations-tab");
 const logsTab = document.getElementById("logs-tab");
 const adminLogsTab = document.getElementById("admin-logs-tab");
@@ -247,6 +251,7 @@ function setActiveTab(tab) {
   // Hide all tab content
   usersTab.classList.add("hidden");
   groupsTab.classList.add("hidden");
+  wearablesTab.classList.add("hidden");
   federationsTab.classList.add("hidden");
   logsTab.classList.add("hidden");
   adminLogsTab.classList.add("hidden");
@@ -269,6 +274,9 @@ function setActiveTab(tab) {
   if (tab === "groups") {
     tabGroups.classList.add("active");
     groupsTab.classList.remove("hidden");
+  } else if (tab === "wearables") {
+    tabWearables.classList.add("active");
+    wearablesTab.classList.remove("hidden");
   } else if (tab === "federations") {
     tabFederations.classList.add("active");
     federationsTab.classList.remove("hidden");
@@ -1840,6 +1848,11 @@ tabUsers.addEventListener("click", () => {
 
 tabGroups.addEventListener("click", () => {
   setActiveTab("groups");
+});
+
+tabWearables.addEventListener("click", () => {
+  setActiveTab("wearables");
+  loadWearables();
 });
 
 tabFederations.addEventListener("click", () => {
@@ -4571,5 +4584,234 @@ locationSpeedSelect.addEventListener("change", () => {
     startLocationPlayback();
   }
 });
+
+// ==================== WEARABLES ====================
+
+const wearableList = document.getElementById("wearable-list");
+const wearableStatus = document.getElementById("wearable-status");
+const refreshWearablesBtn = document.getElementById("refresh-wearables");
+const startWearableScanBtn = document.getElementById("start-wearable-scan");
+const cancelWearableScanBtn = document.getElementById("cancel-wearable-scan");
+const wearableCameraContainer = document.getElementById("wearable-camera-container");
+const wearableCamera = document.getElementById("wearable-camera");
+const wearableNameInput = document.getElementById("wearable-name-input");
+const wearableNameField = document.getElementById("wearable-name");
+const confirmWearablePairBtn = document.getElementById("confirm-wearable-pair");
+const cancelWearablePairBtn = document.getElementById("cancel-wearable-pair");
+const wearableScanStatus = document.getElementById("wearable-scan-status");
+
+let wearableCameraStream = null;
+let wearableQrScanner = null;
+
+async function loadWearables() {
+  try {
+    wearableStatus.textContent = "Loading wearables...";
+    const data = await apiRequest("/wearables", "GET");
+    state.wearables = data.wearables ?? [];
+    renderWearables();
+    wearableStatus.textContent = "";
+  } catch (error) {
+    wearableStatus.textContent = `Error: ${error.message}`;
+    console.error("Failed to load wearables:", error);
+  }
+}
+
+function renderWearables() {
+  wearableList.innerHTML = "";
+
+  if (state.wearables.length === 0) {
+    wearableList.innerHTML = '<div class="hint">No wearable devices paired yet.</div>';
+    return;
+  }
+
+  state.wearables.forEach((device) => {
+    const div = document.createElement("div");
+    div.className = "user-item";
+
+    const statusColor = device.status === "ACTIVE" ? "#22c55e" : "#ef4444";
+    const lastSeen = device.lastSeenAt
+      ? new Date(device.lastSeenAt).toLocaleString()
+      : "Never";
+
+    div.innerHTML = `
+      <div class="user-info">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="color: ${statusColor}; font-size: 10px;">●</span>
+          <strong>${device.name || device.deviceId}</strong>
+        </div>
+        <div class="hint" style="font-size: 11px; margin-top: 0.25rem;">
+          ${device.model || "Unknown device"} • Last seen: ${lastSeen}
+        </div>
+      </div>
+      <div class="user-actions">
+        ${device.status === "ACTIVE" ? `
+          <button class="small secondary revoke-wearable" data-device-id="${device.deviceId}">Revoke</button>
+        ` : `
+          <span class="hint">Revoked</span>
+        `}
+      </div>
+    `;
+
+    wearableList.appendChild(div);
+  });
+
+  // Add revoke button handlers
+  document.querySelectorAll(".revoke-wearable").forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      const deviceId = e.target.dataset.deviceId;
+      if (confirm("Are you sure you want to revoke this device? It will need to be re-paired.")) {
+        await revokeWearable(deviceId);
+      }
+    });
+  });
+}
+
+async function revokeWearable(deviceId) {
+  try {
+    wearableStatus.textContent = "Revoking device...";
+    await apiRequest(`/wearables/${encodeURIComponent(deviceId)}`, "DELETE");
+    await loadWearables();
+    wearableStatus.textContent = "Device revoked successfully.";
+  } catch (error) {
+    wearableStatus.textContent = `Error: ${error.message}`;
+    console.error("Failed to revoke wearable:", error);
+  }
+}
+
+async function startWearableCamera() {
+  try {
+    wearableScanStatus.textContent = "Starting camera...";
+
+    // Request camera access
+    wearableCameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+
+    wearableCamera.srcObject = wearableCameraStream;
+    await wearableCamera.play();
+
+    wearableCameraContainer.classList.remove("hidden");
+    startWearableScanBtn.classList.add("hidden");
+    wearableScanStatus.textContent = "Point camera at QR code on watch...";
+
+    // Start QR code scanning
+    startQrScanning();
+
+  } catch (error) {
+    wearableScanStatus.textContent = `Camera error: ${error.message}`;
+    console.error("Camera access failed:", error);
+  }
+}
+
+function stopWearableCamera() {
+  if (wearableCameraStream) {
+    wearableCameraStream.getTracks().forEach(track => track.stop());
+    wearableCameraStream = null;
+  }
+  if (wearableQrScanner) {
+    clearInterval(wearableQrScanner);
+    wearableQrScanner = null;
+  }
+  wearableCamera.srcObject = null;
+  wearableCameraContainer.classList.add("hidden");
+  startWearableScanBtn.classList.remove("hidden");
+  wearableScanStatus.textContent = "";
+}
+
+function startQrScanning() {
+  // Create canvas for frame capture
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  wearableQrScanner = setInterval(async () => {
+    if (!wearableCamera.videoWidth) return;
+
+    canvas.width = wearableCamera.videoWidth;
+    canvas.height = wearableCamera.videoHeight;
+    ctx.drawImage(wearableCamera, 0, 0);
+
+    try {
+      // Use BarcodeDetector API if available
+      if ("BarcodeDetector" in window) {
+        const detector = new BarcodeDetector({ formats: ["qr_code"] });
+        const barcodes = await detector.detect(canvas);
+
+        if (barcodes.length > 0) {
+          const qrData = barcodes[0].rawValue;
+          handleQrCodeScanned(qrData);
+        }
+      }
+    } catch (error) {
+      // BarcodeDetector not available or failed, continue scanning
+    }
+  }, 200);
+}
+
+function handleQrCodeScanned(qrData) {
+  try {
+    const data = JSON.parse(qrData);
+
+    if (!data.deviceId || !data.publicKey) {
+      wearableScanStatus.textContent = "Invalid QR code. Make sure watch is in pairing mode.";
+      return;
+    }
+
+    // Stop scanning
+    stopWearableCamera();
+
+    // Store pending pairing data
+    state.pendingWearablePairing = data;
+
+    // Show name input
+    wearableNameInput.classList.remove("hidden");
+    wearableNameField.value = data.name || `Watch-${data.deviceId.slice(0, 6)}`;
+    wearableScanStatus.textContent = "QR code scanned! Enter a name for this device.";
+
+  } catch (error) {
+    wearableScanStatus.textContent = "Invalid QR code format.";
+  }
+}
+
+async function confirmWearablePairing() {
+  if (!state.pendingWearablePairing) {
+    wearableScanStatus.textContent = "No pending pairing. Please scan QR code first.";
+    return;
+  }
+
+  try {
+    wearableScanStatus.textContent = "Confirming pairing...";
+
+    const result = await apiRequest("/wearables/confirm", "POST", {
+      deviceId: state.pendingWearablePairing.deviceId,
+      publicKey: state.pendingWearablePairing.publicKey,
+      name: wearableNameField.value.trim() || undefined
+    });
+
+    wearableScanStatus.textContent = `Device "${result.name}" paired successfully!`;
+    state.pendingWearablePairing = null;
+    wearableNameInput.classList.add("hidden");
+
+    // Reload wearables list
+    await loadWearables();
+
+  } catch (error) {
+    wearableScanStatus.textContent = `Pairing failed: ${error.message}`;
+    console.error("Pairing failed:", error);
+  }
+}
+
+function cancelWearablePairing() {
+  stopWearableCamera();
+  state.pendingWearablePairing = null;
+  wearableNameInput.classList.add("hidden");
+  wearableScanStatus.textContent = "";
+}
+
+// Wearable event listeners
+refreshWearablesBtn.addEventListener("click", loadWearables);
+startWearableScanBtn.addEventListener("click", startWearableCamera);
+cancelWearableScanBtn.addEventListener("click", stopWearableCamera);
+confirmWearablePairBtn.addEventListener("click", confirmWearablePairing);
+cancelWearablePairBtn.addEventListener("click", cancelWearablePairing);
 
 showApp(false);
