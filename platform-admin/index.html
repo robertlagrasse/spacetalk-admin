@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spacetalk Admin</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <section id="login-panel" class="card">
+        <h2>SpaceTalk Admin Console</h2>
+        <p class="hint">Sign in with your authorized account to manage tenants.</p>
+        <div id="connection-status" class="hint"></div>
+        <div class="grid">
+          <label>
+            API Base URL
+            <input id="api-base-url" type="text" placeholder="https://api.example.com" />
+          </label>
+        </div>
+        <div class="row">
+          <button id="sign-in-button">Sign in with SSO</button>
+        </div>
+        <p class="hint">You must have an admin account pre-created by an existing administrator.</p>
+      </section>
+
+      <section id="app-panel" class="hidden">
+        <header class="header">
+          <div>
+            <h1>Spacetalk Admin</h1>
+            <p id="user-info">Tenant management console</p>
+          </div>
+          <div class="row">
+            <button id="refresh-tenants">Refresh</button>
+            <button id="logout-app" class="secondary">Sign out</button>
+          </div>
+        </header>
+
+      <div class="tabs">
+        <button id="tab-tenants" class="tab active">Tenants</button>
+        <button id="tab-users" class="tab">Users</button>
+        <button id="tab-pricing" class="tab">Pricing Plans</button>
+        <button id="tab-license" class="tab">License Plans</button>
+        <button id="tab-api-keys" class="tab">API Keys</button>
+        <button id="tab-openai-keys" class="tab">OpenAI Keys</button>
+        <button id="tab-tweaks" class="tab">System Tweaks</button>
+        <button id="tab-admin-logs" class="tab">Admin Logs</button>
+      </div>
+
+      <section id="tenants-tab">
+      <section class="card">
+        <h2>Create Tenant</h2>
+        <div class="grid">
+          <label>
+            Name
+            <input id="tenant-name" type="text" placeholder="Acme Corp" />
+          </label>
+          <label>
+            Tenant ID (optional)
+            <input id="tenant-id" type="text" placeholder="tenant-acme" />
+          </label>
+        </div>
+        <button id="create-tenant">Create Tenant</button>
+      </section>
+
+      <section class="card">
+        <div class="header">
+          <div>
+            <h2>Tenants</h2>
+            <p>Search and filter tenants by status.</p>
+          </div>
+          <div class="filter-row">
+            <input id="tenant-search" type="text" placeholder="Search by name" />
+            <select id="tenant-status-filter">
+              <option value="ALL">All statuses</option>
+              <option value="ACTIVE">ACTIVE</option>
+              <option value="SUSPENDED">SUSPENDED</option>
+              <option value="DECOMMISSIONED">DECOMMISSIONED</option>
+            </select>
+          </div>
+        </div>
+        <div id="tenant-list" class="tenant-list"></div>
+      </section>
+      </section>
+      </section>
+
+      <section id="users-tab" class="hidden">
+        <section class="card">
+          <h2>Create Admin User</h2>
+          <div class="grid">
+            <label>
+              Name
+              <input id="admin-user-name" type="text" placeholder="Dana" />
+            </label>
+            <label>
+              Email
+              <input id="admin-user-email" type="email" placeholder="dana@acme.com" />
+            </label>
+            <label>
+              Status
+              <select id="admin-user-status">
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="SUSPENDED">SUSPENDED</option>
+              </select>
+            </label>
+          </div>
+          <button id="create-admin-user">Create User</button>
+        </section>
+
+        <section class="card">
+          <div class="header">
+            <div>
+              <h2>Admin Users</h2>
+              <p>Search by name or email, filter by status.</p>
+            </div>
+            <div class="filter-row">
+              <input id="admin-user-search" type="text" placeholder="Search users" />
+              <select id="admin-user-status-filter">
+                <option value="ALL">All statuses</option>
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="SUSPENDED">SUSPENDED</option>
+              </select>
+            </div>
+          </div>
+          <div id="admin-user-list" class="tenant-list"></div>
+          <div id="assignment-status" class="hint"></div>
+        </section>
+      </section>
+
+      <section id="pricing-tab" class="hidden">
+        <section class="card">
+          <h2>Create Pricing Plan</h2>
+          <div class="grid">
+            <label>
+              Plan Name
+              <input id="plan-name" type="text" placeholder="Enterprise" />
+            </label>
+            <label>
+              <input id="plan-is-default" type="checkbox" />
+              Set as Default Plan
+            </label>
+          </div>
+          <h3 style="margin-top: 1rem;">Cost Configuration</h3>
+          <div class="grid">
+            <label>
+              User Cost ($/month)
+              <input id="plan-user-cost" type="number" step="0.01" min="0" value="2.00" />
+            </label>
+            <label>
+              Dispatcher Cost ($/month)
+              <input id="plan-dispatcher-cost" type="number" step="0.01" min="0" value="5.00" />
+            </label>
+            <label>
+              Transcription Cost ($/user/month)
+              <input id="plan-transcription-cost" type="number" step="0.01" min="0" value="2.00" />
+            </label>
+            <label>
+              Translation Cost ($/user/month)
+              <input id="plan-translation-cost" type="number" step="0.01" min="0" value="3.00" />
+            </label>
+            <label>
+              Elevation Rule Cost ($/rule/month)
+              <input id="plan-elevation-cost" type="number" step="0.01" min="0" value="1.00" />
+            </label>
+            <label>
+              Retention Cost ($/day/user)
+              <input id="plan-retention-cost" type="number" step="0.001" min="0" value="0.01" />
+            </label>
+          </div>
+          <button id="create-pricing-plan">Create Plan</button>
+          <span id="create-plan-status" class="hint"></span>
+        </section>
+
+        <section class="card">
+          <div class="header">
+            <div>
+              <h2>Pricing Plans</h2>
+              <p>Manage pricing plans and assign them to tenants.</p>
+            </div>
+            <button id="refresh-pricing-plans" class="secondary">Refresh</button>
+          </div>
+          <div id="pricing-plan-list" class="tenant-list"></div>
+        </section>
+      </section>
+
+      <section id="license-tab" class="hidden">
+        <section class="card">
+          <h2>Create License Plan</h2>
+          <div class="grid">
+            <label>
+              Plan Name
+              <input id="license-plan-name" type="text" placeholder="Basic" />
+            </label>
+            <label>
+              <input id="license-is-default" type="checkbox" />
+              Set as Default Plan
+            </label>
+          </div>
+          <h3 style="margin-top: 1rem;">Feature Access</h3>
+          <div class="grid">
+            <label>
+              <input id="license-transcription" type="checkbox" checked />
+              Transcription
+            </label>
+            <label>
+              <input id="license-translation" type="checkbox" checked />
+              Translation (requires Transcription)
+            </label>
+            <label>
+              <input id="license-elevation" type="checkbox" checked />
+              AI Elevation (requires Transcription)
+            </label>
+            <label>
+              <input id="license-retention" type="checkbox" checked />
+              Data Retention Configuration
+            </label>
+          </div>
+          <h3 style="margin-top: 1rem;">User Limit</h3>
+          <div class="grid">
+            <label>
+              <input id="license-unlimited-users" type="checkbox" checked />
+              Unlimited Users
+            </label>
+            <label>
+              Max Users (if limited)
+              <input id="license-user-limit" type="number" min="1" value="10" disabled />
+            </label>
+          </div>
+          <button id="create-license-plan">Create Plan</button>
+          <span id="create-license-status" class="hint"></span>
+        </section>
+
+        <section class="card">
+          <div class="header">
+            <div>
+              <h2>License Plans</h2>
+              <p>Manage license plans to control feature access for tenants.</p>
+            </div>
+            <button id="refresh-license-plans" class="secondary">Refresh</button>
+          </div>
+          <div id="license-plan-list" class="tenant-list"></div>
+        </section>
+      </section>
+
+      <section id="api-keys-tab" class="hidden">
+        <section class="card">
+          <div class="header">
+            <div>
+              <h2>Platform API Keys</h2>
+              <p>Generate API keys for external systems to programmatically manage platform resources.</p>
+            </div>
+            <div class="filter-row">
+              <button id="refresh-platform-api-keys" class="secondary">Refresh</button>
+            </div>
+          </div>
+          <div id="platform-api-keys-status" class="hint"></div>
+        </section>
+
+        <section class="card">
+          <h2>Create API Key</h2>
+          <div class="grid">
+            <label>
+              Key Name
+              <input id="platform-api-key-name" type="text" placeholder="Integration name" />
+            </label>
+            <label>
+              Expires
+              <select id="platform-api-key-expiry">
+                <option value="">Never</option>
+                <option value="30">30 days</option>
+                <option value="90">90 days</option>
+                <option value="180">180 days</option>
+                <option value="365">1 year</option>
+              </select>
+            </label>
+          </div>
+          <div style="margin-top: 1rem;">
+            <label>Permissions</label>
+            <div id="platform-api-key-permissions" class="assignment-grid" style="margin-top: 0.5rem;">
+              <div>
+                <h3>Available</h3>
+                <select id="platform-api-key-available-perms" multiple size="10"></select>
+              </div>
+              <div class="assignment-actions">
+                <button type="button" id="platform-api-key-add-perm">Add &gt;&gt;</button>
+                <button type="button" id="platform-api-key-remove-perm" class="secondary">&lt;&lt; Remove</button>
+                <button type="button" id="platform-api-key-add-all" class="small secondary" style="margin-top: 1rem;">Add All</button>
+              </div>
+              <div>
+                <h3>Selected</h3>
+                <select id="platform-api-key-selected-perms" multiple size="10"></select>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="margin-top: 1rem;">
+            <button id="create-platform-api-key">Create API Key</button>
+            <div id="create-platform-api-key-status" class="hint"></div>
+          </div>
+        </section>
+
+        <section id="platform-api-key-created-card" class="card hidden">
+          <h2>API Key Created</h2>
+          <div class="hint" style="margin-bottom: 1rem; padding: 0.75rem; background: #1a1a2e; border-radius: 6px; border-left: 3px solid #eab308;">
+            <strong>Important:</strong> Copy this key now. You won't be able to see it again.
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input id="platform-api-key-created-value" type="text" readonly style="flex: 1; font-family: monospace;" />
+            <button id="platform-api-key-copy" class="secondary">Copy</button>
+          </div>
+          <div class="row" style="margin-top: 1rem;">
+            <button id="platform-api-key-dismiss">Done</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="header">
+            <h2>Keys</h2>
+            <div class="filter-row">
+              <select id="platform-api-key-status-filter">
+                <option value="ALL">All statuses</option>
+                <option value="ACTIVE" selected>Active only</option>
+                <option value="REVOKED">Revoked only</option>
+                <option value="EXPIRED">Expired only</option>
+              </select>
+            </div>
+          </div>
+          <div id="platform-api-keys-list" class="tenant-list"></div>
+        </section>
+      </section>
+
+      <section id="openai-keys-tab" class="hidden">
+        <section class="card">
+          <div class="header">
+            <div>
+              <h2>OpenAI Keys</h2>
+              <p class="hint">Configure API keys for platform-wide services. These keys are stored securely in AWS Secrets Manager. Service-specific keys override the default key when set.</p>
+            </div>
+            <button id="validate-all-keys" class="secondary">Validate All Keys</button>
+          </div>
+
+          <div class="key-item">
+            <div class="key-header">
+              <h3>Default OpenAI API Key</h3>
+              <div class="key-badges">
+                <span id="openai-key-status" class="status-badge">Loading...</span>
+                <span id="openai-key-valid" class="status-badge"></span>
+              </div>
+            </div>
+            <p class="hint">Fallback key used when service-specific keys are not configured.</p>
+            <div class="key-input-row">
+              <input id="openai-api-key" type="password" placeholder="sk-..." />
+              <button id="toggle-openai-key" class="secondary" title="Show/Hide">Show</button>
+            </div>
+            <div class="row">
+              <button id="save-openai-key">Save Key</button>
+              <button id="clear-openai-key" class="secondary">Clear</button>
+              <span id="openai-key-feedback" class="hint"></span>
+            </div>
+          </div>
+
+          <div class="key-item">
+            <div class="key-header">
+              <h3>Transcription API Key (Whisper)</h3>
+              <div class="key-badges">
+                <span id="transcription-key-status" class="status-badge">Loading...</span>
+                <span id="transcription-key-valid" class="status-badge"></span>
+              </div>
+            </div>
+            <p class="hint">Used for Whisper speech-to-text transcription. Falls back to default key if not set.</p>
+            <div class="key-input-row">
+              <input id="transcription-api-key" type="password" placeholder="sk-..." />
+              <button id="toggle-transcription-key" class="secondary" title="Show/Hide">Show</button>
+            </div>
+            <div class="row">
+              <button id="save-transcription-key">Save Key</button>
+              <button id="clear-transcription-key" class="secondary">Clear</button>
+              <span id="transcription-key-feedback" class="hint"></span>
+            </div>
+          </div>
+
+          <div class="key-item">
+            <div class="key-header">
+              <h3>Translation API Key (GPT-4)</h3>
+              <div class="key-badges">
+                <span id="translation-key-status" class="status-badge">Loading...</span>
+                <span id="translation-key-valid" class="status-badge"></span>
+              </div>
+            </div>
+            <p class="hint">Used for GPT-4 powered translation. Falls back to default key if not set.</p>
+            <div class="key-input-row">
+              <input id="translation-api-key" type="password" placeholder="sk-..." />
+              <button id="toggle-translation-key" class="secondary" title="Show/Hide">Show</button>
+            </div>
+            <div class="row">
+              <button id="save-translation-key">Save Key</button>
+              <button id="clear-translation-key" class="secondary">Clear</button>
+              <span id="translation-key-feedback" class="hint"></span>
+            </div>
+          </div>
+
+          <div class="key-item">
+            <div class="key-header">
+              <h3>Text-to-Speech API Key</h3>
+              <div class="key-badges">
+                <span id="tts-key-status" class="status-badge">Loading...</span>
+                <span id="tts-key-valid" class="status-badge"></span>
+              </div>
+            </div>
+            <p class="hint">Used for OpenAI text-to-speech generation. Falls back to default key if not set.</p>
+            <div class="key-input-row">
+              <input id="tts-api-key" type="password" placeholder="sk-..." />
+              <button id="toggle-tts-key" class="secondary" title="Show/Hide">Show</button>
+            </div>
+            <div class="row">
+              <button id="save-tts-key">Save Key</button>
+              <button id="clear-tts-key" class="secondary">Clear</button>
+              <span id="tts-key-feedback" class="hint"></span>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section id="tweaks-tab" class="hidden">
+        <section class="card">
+          <h2>Summarization Prompt</h2>
+          <p class="hint">Configure the prompt used to summarize radio transmissions. This prompt is sent to the LLM along with the transcript.</p>
+
+          <div class="setting-item">
+            <div class="setting-header">
+              <h3>Current Prompt</h3>
+              <span id="prompt-status" class="status-badge">Loading...</span>
+            </div>
+            <div id="prompt-default-display" class="hint" style="white-space: pre-wrap; background: var(--bg-secondary); padding: 1rem; border-radius: 4px; margin: 0.5rem 0;"></div>
+
+            <h3 style="margin-top: 1.5rem;">Edit Prompt</h3>
+            <textarea id="summarization-prompt" rows="6" placeholder="Enter custom summarization prompt..."></textarea>
+            <div class="row" style="margin-top: 0.5rem;">
+              <button id="save-prompt">Save Prompt</button>
+              <button id="reset-prompt" class="secondary">Reset to Default</button>
+              <span id="prompt-feedback" class="hint"></span>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section id="admin-logs-tab" class="hidden">
+        <section class="card">
+          <div class="header">
+            <div>
+              <h2>Admin Logs</h2>
+              <p>View history of administrative changes made at the platform level.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <label>
+              Admin
+              <select id="admin-log-admin-filter">
+                <option value="">All Admins</option>
+              </select>
+            </label>
+            <label>
+              Start Date
+              <input id="admin-logs-start-date" type="date" />
+            </label>
+            <label>
+              End Date
+              <input id="admin-logs-end-date" type="date" />
+            </label>
+          </div>
+          <div class="row" style="margin-top: 1rem;">
+            <button id="apply-admin-log-filters">Apply Filters</button>
+            <button id="clear-admin-log-filters" class="secondary">Clear</button>
+            <button id="refresh-admin-logs" class="secondary">Refresh</button>
+            <button id="export-admin-logs" class="secondary">Export CSV</button>
+          </div>
+          <div id="admin-log-status" class="hint"></div>
+        </section>
+
+        <section class="card">
+          <table id="admin-log-table" class="log-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Admin</th>
+                <th>Action</th>
+                <th>Target</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="admin-log-table-body">
+            </tbody>
+          </table>
+          <div id="admin-logs-pagination" class="row" style="margin-top: 1rem;">
+            <button id="admin-logs-load-more" class="secondary" style="display: none;">Load More</button>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

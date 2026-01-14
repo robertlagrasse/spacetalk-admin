@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spacetalk Tenant Admin</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div>
+          <h1>Spacetalk Tenant Admin</h1>
+          <p>Manage your assigned tenants and users.</p>
+        </div>
+        <div id="tenant-switcher" class="row hidden">
+          <label>
+            Active Tenant
+            <select id="tenant-selector"></select>
+          </label>
+          <div class="hint" id="tenant-status"></div>
+          <button id="logout" class="secondary">Sign Out</button>
+        </div>
+      </header>
+
+      <section id="login-panel" class="card">
+        <h2>Sign In</h2>
+        <div class="grid">
+          <label>
+            API Base URL
+            <input id="api-base-url" type="text" />
+          </label>
+          <label>
+            Email
+            <input id="admin-email" type="email" placeholder="admin@tenant.com" />
+          </label>
+          <label>
+            Password
+            <input id="admin-password" type="password" placeholder="Temporary password" />
+          </label>
+        </div>
+        <div class="row">
+          <button id="login">Sign In</button>
+          <div id="login-status" class="hint"></div>
+        </div>
+      </section>
+
+      <section id="app-panel" class="hidden">
+        <div class="app-layout">
+          <nav class="sidebar">
+            <div class="sidebar-section" data-section="tenant-config">
+              <div class="sidebar-section-header">
+                <span>Tenant Configuration</span>
+                <span class="chevron">▼</span>
+              </div>
+              <div class="sidebar-section-items">
+                <button id="tab-users" class="sidebar-item active">Users</button>
+                <button id="tab-groups" class="sidebar-item">Groups</button>
+                <button id="tab-federations" class="sidebar-item">Federations</button>
+              </div>
+            </div>
+
+            <div class="sidebar-section" data-section="ai-tools">
+              <div class="sidebar-section-header">
+                <span>AI Tools</span>
+                <span class="chevron">▼</span>
+              </div>
+              <div class="sidebar-section-items">
+                <button id="tab-transcription" class="sidebar-item">Transcription</button>
+                <button id="tab-translation" class="sidebar-item">Translation</button>
+                <button id="tab-elevation" class="sidebar-item">AI Elevation</button>
+              </div>
+            </div>
+
+            <div class="sidebar-section" data-section="logging">
+              <div class="sidebar-section-header">
+                <span>Logging</span>
+                <span class="chevron">▼</span>
+              </div>
+              <div class="sidebar-section-items">
+                <button id="tab-logs" class="sidebar-item">Transmission Logs</button>
+                <button id="tab-admin-logs" class="sidebar-item">Admin Logs</button>
+                <button id="tab-location-history" class="sidebar-item">Location History</button>
+              </div>
+            </div>
+
+            <div class="sidebar-section" data-section="policy">
+              <div class="sidebar-section-header">
+                <span>Policy Management</span>
+                <span class="chevron">▼</span>
+              </div>
+              <div class="sidebar-section-items">
+                <button id="tab-policies" class="sidebar-item">Data Retention</button>
+              </div>
+            </div>
+
+            <div class="sidebar-section" data-section="outside-access">
+              <div class="sidebar-section-header">
+                <span>Outside Access</span>
+                <span class="chevron">▼</span>
+              </div>
+              <div class="sidebar-section-items">
+                <button id="tab-api-keys" class="sidebar-item">API Keys</button>
+              </div>
+            </div>
+
+            <div class="sidebar-section" data-section="billing">
+              <div class="sidebar-section-header">
+                <span>Billing</span>
+                <span class="chevron">▼</span>
+              </div>
+              <div class="sidebar-section-items">
+                <button id="tab-billing" class="sidebar-item">Cost Summary</button>
+              </div>
+            </div>
+          </nav>
+
+          <div class="main-content">
+        <section id="users-tab">
+          <div id="user-compliance-warning" class="compliance-warning hidden"></div>
+          <section class="card">
+            <div class="card-header-row">
+              <h2>Create User</h2>
+              <span id="user-limit-display" class="user-count-badge"></span>
+            </div>
+            <div class="grid">
+              <label>
+                Display Name
+                <input id="user-name" type="text" placeholder="Jordan" />
+              </label>
+              <label>
+                Email
+                <input id="user-email" type="email" placeholder="jordan@tenant.com" />
+              </label>
+              <label>
+                Role
+                <select id="user-role">
+                  <option value="USER">USER</option>
+                  <option value="DISPATCHER">DISPATCHER</option>
+                  <option value="TENANT_ADMIN">TENANT_ADMIN</option>
+                </select>
+              </label>
+              <label>
+                Status
+                <select id="user-status">
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="SUSPENDED">SUSPENDED</option>
+                </select>
+              </label>
+              <label>
+                Temp Password
+                <input id="user-temp-password" type="password" placeholder="Temp password" />
+              </label>
+            </div>
+            <button id="create-user">Create User</button>
+            <div id="create-user-status" class="hint"></div>
+          </section>
+
+          <section class="card">
+            <h2>Cost Calculator</h2>
+            <p class="hint" id="user-cost-hint">Loading pricing...</p>
+            <div class="row" style="margin: 0.5rem 0; gap: 1rem; font-size: 12px;">
+              <span><span style="color:#22c55e">●</span> <span id="user-cost-legend-user">User/Admin</span></span>
+              <span><span style="color:#eab308">●</span> <span id="user-cost-legend-dispatcher">Dispatcher</span></span>
+            </div>
+            <div id="user-cost-calculator" style="margin-top: 1rem; padding: 1rem; background: #1a1a2e; border-radius: 8px;">
+              <div id="user-cost-breakdown" style="font-size: 14px; margin-bottom: 0.5rem; line-height: 1.6;"></div>
+              <div style="font-size: 24px; font-weight: bold; color: #22c55e;">
+                $<span id="user-cost-monthly">0.00</span>/month
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="header">
+              <div>
+                <h2>Users</h2>
+                <p>Search by name or email, filter by status.</p>
+              </div>
+              <div class="filter-row">
+                <input id="user-search" type="text" placeholder="Search users" />
+                <select id="user-status-filter">
+                  <option value="ALL">All statuses</option>
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="SUSPENDED">SUSPENDED</option>
+                </select>
+                <button id="refresh-users" class="secondary">Refresh</button>
+              </div>
+            </div>
+            <div id="user-list" class="tenant-list"></div>
+            <div id="user-status-message" class="hint"></div>
+          </section>
+        </section>
+
+        <section id="groups-tab" class="hidden">
+          <section class="card">
+            <h2>Create Group</h2>
+            <div class="grid">
+              <label>
+                Group Name
+                <input id="group-name" type="text" placeholder="Field Ops" />
+              </label>
+              <label style="flex-direction: row; align-items: center; gap: 8px;">
+                <input id="group-priority" type="checkbox" style="width: 18px; height: 18px;" />
+                <span>Priority Group</span>
+              </label>
+              <label style="flex-direction: row; align-items: center; gap: 8px;">
+                <input id="group-geo-enabled" type="checkbox" style="width: 18px; height: 18px;" />
+                <span>Enable Geo-Fence</span>
+              </label>
+            </div>
+            <div id="geo-fields" class="hidden" style="margin-top: 0.5rem;">
+              <div class="grid">
+                <label>
+                  Address (optional)
+                  <input id="group-geo-address" type="text" placeholder="123 Main St, City" />
+                </label>
+              </div>
+              <div class="grid" style="margin-top: 0.5rem;">
+                <label>
+                  Latitude
+                  <input id="group-geo-lat" type="number" step="0.000001" placeholder="37.7749" />
+                </label>
+                <label>
+                  Longitude
+                  <input id="group-geo-lng" type="number" step="0.000001" placeholder="-122.4194" />
+                </label>
+                <label>
+                  Radius
+                  <select id="group-geo-radius">
+                    <option value="100">100m</option>
+                    <option value="250">250m</option>
+                    <option value="500" selected>500m</option>
+                    <option value="1000">1km</option>
+                    <option value="5000">5km</option>
+                  </select>
+                </label>
+              </div>
+              <div class="hint" style="margin-top: 0.5rem;">Click on the map to set the geo-fence location.</div>
+              <div id="group-geo-map" style="height: 300px; border-radius: 8px; background: #1a1a2e; margin-top: 0.5rem;"></div>
+            </div>
+            <div class="hint">Priority groups auto-elevate all messages. Geo-fenced groups grant temporary access to users within the defined area.</div>
+            <button id="create-group">Create Group</button>
+            <div id="create-group-status" class="hint"></div>
+          </section>
+
+          <section class="card">
+            <div class="header">
+              <div>
+                <h2>Groups</h2>
+                <p>Search by name.</p>
+              </div>
+              <div class="filter-row">
+                <input id="group-search" type="text" placeholder="Search groups" />
+                <button id="refresh-groups" class="secondary">Refresh</button>
+              </div>
+            </div>
+            <div id="group-list" class="tenant-list"></div>
+            <div id="group-status" class="hint"></div>
+          </section>
+        </section>
+
+        <section id="federations-tab" class="hidden">
+          <section class="card">
+            <h2>Create Federation Invite</h2>
+            <div class="hint" id="federation-self"></div>
+            <div class="grid">
+              <label>
+                Target Tenant ID
+                <input id="federation-target" type="text" placeholder="tenant-beta" />
+              </label>
+            </div>
+            <button id="create-federation">Create Invite</button>
+            <div id="federation-create-status" class="hint"></div>
+            <div id="federation-code" class="hint"></div>
+          </section>
+
+          <section class="card">
+            <h2>Accept Federation Invite</h2>
+            <div class="grid">
+              <label>
+                Invite ID
+                <input id="federation-invite-id" type="text" placeholder="invite id" />
+              </label>
+              <label>
+                Verification Code
+                <input id="federation-code-input" type="text" placeholder="6-digit code" />
+              </label>
+            </div>
+            <button id="accept-federation">Accept Invite</button>
+            <div id="federation-accept-status" class="hint"></div>
+          </section>
+
+          <section class="card">
+            <div class="header">
+              <div>
+                <h2>Federations</h2>
+                <p>Active and pending federations.</p>
+              </div>
+              <div class="filter-row">
+                <button id="refresh-federations" class="secondary">Refresh</button>
+              </div>
+            </div>
+            <div id="federation-list" class="tenant-list"></div>
+            <div id="federation-status" class="hint"></div>
+          </section>
+        </section>
+
+        <section id="logs-tab" class="hidden">
+          <section class="card">
+            <div class="header">
+              <div>
+                <h2>Transmission Logs</h2>
+                <p>View all audio transmissions across the platform.</p>
+              </div>
+            </div>
+            <div class="grid">
+              <label>
+                User
+                <select id="log-user-filter">
+                  <option value="">All Users</option>
+                </select>
+              </label>
+              <label>
+                Channel
+                <select id="log-channel-filter">
+                  <option value="">All Channels</option>
+                </select>
+              </label>
+              <label>
+                Start Date
+                <input id="log-start-date" type="date" />
+              </label>
+              <label>
+                End Date
+                <input id="log-end-date" type="date" />
+              </label>
+            </div>
+            <div class="row" style="margin-top: 1rem;">
+              <button id="apply-log-filters">Apply Filters</button>
+              <button id="clear-log-filters" class="secondary">Clear</button>
+              <button id="refresh-logs" class="secondary">Refresh</button>
+              <button id="export-logs" class="secondary">Export CSV</button>
+            </div>
+            <div id="log-status" class="hint"></div>
+          </section>
+
+          <section class="card">
+            <table id="log-table" class="log-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Sender</th>
+                  <th>Location</th>
+                  <th>Channel</th>
+                  <th>Summary</th>
+                  <th>Audio</th>
+                </tr>
+              </thead>
+              <tbody id="log-table-body">
+              </tbody>
+            </table>
+            <div id="log-pagination" class="row" style="margin-top: 1rem;">
+              <button id="load-more-logs" class="secondary" style="display: none;">Load More</button>
+            </div>
+          </section>
+        </section>
+
+        <section id="admin-logs-tab" class="hidden">
+          <section class="card">
+            <div class="header">
+              <div>
+                <h2>Admin Logs</h2>
+                <p>View history of administrative changes made to this tenant.</p>
+              </div>
+            </div>
+            <div class="grid">
+              <label>
+                Admin
+                <select id="admin-log-admin-filter">
+                  <option value="">All Admins</option>
+                </select>
+              </label>
+              <label>
+                Start Date
+                <input id="admin-log-start-date" type="date" />
+              </label>
+              <label>
+                End Date
+                <input id="admin-log-end-date" type="date" />
+              </label>
+            </div>
+            <div class="row" style="margin-top: 1rem;">
+              <button id="apply-admin-log-filters">Apply Filters</button>
+              <button id="clear-admin-log-filters" class="secondary">Clear</button>
+              <button id="refresh-admin-logs" class="secondary">Refresh</button>
+              <button id="export-admin-logs" class="secondary">Export CSV</button>
+            </div>
+            <div id="admin-log-status" class="hint"></div>
+          </section>
+
+          <section class="card">
+            <table id="admin-log-table" class="log-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Admin</th>
+                  <th>Action</th>
+                  <th>Target</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="admin-log-table-body">
+              </tbody>
+            </table>
+            <div id="admin-log-pagination" class="row" style="margin-top: 1rem;">
+              <button id="load-more-admin-logs" class="secondary" style="display: none;">Load More</button>
+            </div>
+          </section>
+        </section>
+
+        <section id="location-history-tab" class="hidden">
+          <section class="card">
+            <div class="header">
+              <div>
+                <h2>Location History</h2>
+                <p>View and playback user location history on a map.</p>
+              </div>
+            </div>
+            <div class="grid">
+              <label>
+                User
+                <select id="location-user-filter">
+                  <option value="">Select a user</option>
+                </select>
+              </label>
+              <label>
+                Start Date
+                <input id="location-start-date" type="date" />
+              </label>
+              <label>
+                End Date
+                <input id="location-end-date" type="date" />
+              </label>
+            </div>
+            <div class="row" style="margin-top: 1rem;">
+              <button id="load-location-history">Load History</button>
+              <div id="location-status" class="hint"></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="location-legend">
+              <div class="legend-section">
+                <span class="legend-section-title">Connection:</span>
+                <div class="legend-item">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="#94a3b8">
+                    <path d="M12 22V10"/><path d="M12 10l-4 4"/><path d="M12 10l4 4"/>
+                    <rect x="10" y="2" width="4" height="8" rx="1"/>
+                    <path d="M6 8c0-3.3 2.7-6 6-6s6 2.7 6 6" fill="none" stroke="#94a3b8" stroke-width="2"/>
+                  </svg>
+                  Cell
+                </div>
+                <div class="legend-item">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="#94a3b8">
+                    <circle cx="12" cy="18" r="3"/>
+                    <path d="M5 12c0-3.9 3.1-7 7-7s7 3.1 7 7" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M2 9c0-5.5 4.5-10 10-10s10 4.5 10 10" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round"/>
+                  </svg>
+                  WiFi
+                </div>
+                <div class="legend-item">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="#94a3b8">
+                    <ellipse cx="12" cy="12" rx="3" ry="2" transform="rotate(-45 12 12)"/>
+                    <path d="M4 4l3 3" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M17 17l3 3" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="4" cy="20" r="2" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+                  </svg>
+                  Satellite
+                </div>
+                <div class="legend-item">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="#38bdf8">
+                    <rect x="7" y="4" width="10" height="18" rx="2" ry="2"/>
+                    <circle cx="12" cy="9" r="2.5" fill="#0f172a"/>
+                    <rect x="9" y="14" width="6" height="5" rx="1" fill="#0f172a"/>
+                    <rect x="4" y="6" width="3" height="5" rx="1"/>
+                  </svg>
+                  Transmission
+                </div>
+              </div>
+              <div class="legend-section">
+                <span class="legend-section-title">Presence (color):</span>
+                <div class="legend-item"><span class="legend-dot" style="background: #22c55e;"></span> Available</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #f59e0b;"></span> Busy</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #ef4444;"></span> DND</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #6b7280;"></span> Offline</div>
+              </div>
+            </div>
+            <div id="location-map" style="height: 500px; border-radius: 8px; background: #1a1a2e;"></div>
+            <div id="location-playback-controls" class="playback-controls hidden">
+              <div class="playback-timeline">
+                <input type="range" id="location-timeline" min="0" max="100" value="0" />
+                <div class="playback-time">
+                  <span id="location-current-time">--:--</span>
+                  <span id="location-total-points">0 points</span>
+                </div>
+              </div>
+              <div class="playback-buttons">
+                <button id="location-play" class="playback-btn">▶ Play</button>
+                <button id="location-pause" class="playback-btn secondary hidden">⏸ Pause</button>
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                  Speed
+                  <select id="location-speed">
+                    <option value="0.5">0.5x</option>
+                    <option value="1" selected>1x</option>
+                    <option value="2">2x</option>
+                    <option value="5">5x</option>
+                    <option value="10">10x</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Transmission Log</h2>
+            <p class="hint">Audio messages sent by this user during the selected time period.</p>
+            <div id="transmission-log-container" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
+              <p class="hint">Select a user and date range, then click "Load History" to view transmissions.</p>
+            </div>
+          </section>
+        </section>
+
+        <section id="policies-tab" class="hidden">
+          <div id="retention-license-warning" class="license-warning hidden">
+            Data Retention configuration is not included in your license plan. Contact your administrator to upgrade.
+          </div>
+          <section class="card">
+            <div class="header">
+              <div>
+                <h2>Data Retention</h2>
+                <p>Configure how long communications are retained. The longest applicable policy wins.</p>
+              </div>
+              <div class="filter-row">
+                <button id="refresh-policies" class="secondary">Refresh</button>
+              </div>
+            </div>
+            <div class="hint" style="margin-top: 1rem; padding: 0.75rem; background: #1a1a2e; border-radius: 6px; border-left: 3px solid #eab308;">
+              <strong>Recommendation:</strong> Set retention policies at the tenant or group level for easier management. User-level policies should only be used for specific compliance or VIP requirements.
+            </div>
+            <div id="policies-status" class="hint"></div>
+          </section>
+
+          <section class="card">
+            <h2>Tenant Default</h2>
+            <p class="hint">Applied to all communications unless overridden by channel or user policies.</p>
+            <div class="grid">
+              <label>
+                Retention Period
+                <select id="tenant-retention">
+                  <option value="">30 days (default, free)</option>
+                  <option value="90">90 days</option>
+                  <option value="180">180 days</option>
+                  <option value="365">365 days</option>
+                </select>
+              </label>
+            </div>
+            <div class="row" style="margin-top: 1rem;">
+              <button id="save-tenant-retention">Save</button>
+              <div id="tenant-retention-status" class="hint"></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Cost Calculator</h2>
+            <p class="hint" id="retention-cost-hint">First 30 days free. Effective retention = max(tenant, user, channel).</p>
+            <div class="row" style="margin: 0.5rem 0; gap: 1rem; font-size: 12px;">
+              <span><span style="color:#6b7280">●</span> Tenant default</span>
+              <span><span style="color:#22c55e">●</span> User policy</span>
+              <span><span style="color:#eab308">●</span> Channel policy</span>
+            </div>
+            <div id="cost-calculator" style="margin-top: 1rem; padding: 1rem; background: #1a1a2e; border-radius: 8px;">
+              <div id="cost-breakdown" style="font-size: 14px; margin-bottom: 0.5rem; line-height: 1.6;"></div>
+              <div style="font-size: 24px; font-weight: bold; color: #22c55e;">
+                $<span id="cost-monthly">0.00</span>/month
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Channel Policies</h2>
+            <p class="hint">Override retention for specific channels. Leave empty to inherit from tenant default.</p>
+            <div id="channel-policies-list" class="tenant-list"></div>
+          </section>
+
+          <section class="card">
+            <h2>User Policies</h2>
+            <p class="hint">Override retention for specific users. Useful for compliance or VIP users.</p>
+            <div id="user-policies-list" class="tenant-list"></div>
+          </section>
+        </section>
+
+        <section id="transcription-tab" class="hidden">
+          <div id="transcription-license-warning" class="license-warning hidden">
+            Transcription is not included in your license plan. Contact your administrator to upgrade.
+          </div>
+          <section class="card">
+            <div class="header">
+              <div>
+                <h2>Transcription</h2>
+                <p>Master switch for transcription. Enables speech-to-text and AI summaries. Required for translation and AI elevation.</p>
+              </div>
+              <div class="filter-row">
+                <button id="refresh-transcription" class="secondary">Refresh</button>
+              </div>
+            </div>
+            <div id="transcription-status" class="hint"></div>
+          </section>
+
+          <section class="card">
+            <h2>Tenant Transcription</h2>
+            <p class="hint">When enabled, all audio transmissions will be transcribed to text.</p>
+            <div class="row" style="align-items: center; gap: 1rem; margin-top: 1rem;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="tenant-transcription-toggle" style="width: 20px; height: 20px;" />
+                <span>Enable Transcription for Tenant</span>
+              </label>
+              <button id="save-tenant-transcription">Save</button>
+              <div id="tenant-transcription-status" class="hint"></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Cost Calculator</h2>
+            <p class="hint">Flat rate per user when transcription is enabled.</p>
+            <div id="transcription-cost-calculator" style="margin-top: 1rem; padding: 1rem; background: #1a1a2e; border-radius: 8px;">
+              <div id="transcription-cost-breakdown" style="font-size: 14px; margin-bottom: 0.5rem; line-height: 1.6;"></div>
+              <div style="font-size: 24px; font-weight: bold; color: #22c55e;">
+                $<span id="transcription-cost-monthly">0.00</span>/month
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section id="translation-tab" class="hidden">
+          <div id="translation-license-warning" class="license-warning hidden">
+            Translation is not included in your license plan. Contact your administrator to upgrade.
+          </div>
+          <section class="card">
+            <div class="header">
+              <div>
+                <h2>Translation</h2>
+                <p>Enable multi-language support for your tenant. Requires transcription to be enabled first.</p>
+              </div>
+              <div class="filter-row">
+                <button id="refresh-translation" class="secondary">Refresh</button>
+              </div>
+            </div>
+            <div id="translation-status" class="hint"></div>
+          </section>
+
+          <section class="card">
+            <h2>Tenant Translation</h2>
+            <p class="hint">Master switch for translation. When enabled, users can receive translations in their preferred language.</p>
+            <div class="row" style="align-items: center; gap: 1rem; margin-top: 1rem;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="tenant-translation-toggle" style="width: 20px; height: 20px;" />
+                <span>Enable Translation for Tenant</span>
+              </label>
+              <button id="save-tenant-translation">Save</button>
+              <div id="tenant-translation-status" class="hint"></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Cost Calculator</h2>
+            <p class="hint">Flat rate per user with translation enabled per month.</p>
+            <div class="row" style="margin: 0.5rem 0; gap: 1rem; font-size: 12px;">
+              <span><span style="color:#6b7280">●</span> Disabled</span>
+              <span><span style="color:#22c55e">●</span> User policy</span>
+              <span><span style="color:#eab308">●</span> Channel policy</span>
+            </div>
+            <div id="translation-cost-calculator" style="margin-top: 1rem; padding: 1rem; background: #1a1a2e; border-radius: 8px;">
+              <div id="translation-cost-breakdown" style="font-size: 14px; margin-bottom: 0.5rem; line-height: 1.6;"></div>
+              <div style="font-size: 24px; font-weight: bold; color: #22c55e;">
+                $<span id="translation-cost-monthly">0.00</span>/month
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Channel Translation</h2>
+            <p class="hint">Enable translation for all members of specific channels.</p>
+            <div id="translation-channel-container" class="assignment-grid">
+              <div>
+                <h3>Untranslated Channels</h3>
+                <select id="untranslated-channels" multiple size="8"></select>
+              </div>
+              <div class="assignment-actions">
+                <button id="enable-channel-translation">Enable &gt;&gt;</button>
+                <button id="disable-channel-translation" class="secondary">&lt;&lt; Disable</button>
+              </div>
+              <div>
+                <h3>Translated Channels</h3>
+                <select id="translated-channels" multiple size="8"></select>
+              </div>
+            </div>
+            <div id="channel-translation-status" class="hint"></div>
+          </section>
+
+          <section class="card">
+            <h2>User Translation</h2>
+            <p class="hint">Enable or disable translation for individual users.</p>
+            <div id="translation-user-container" class="assignment-grid">
+              <div>
+                <h3>Untranslated Users</h3>
+                <select id="untranslated-users" multiple size="8"></select>
+              </div>
+              <div class="assignment-actions">
+                <button id="enable-user-translation">Enable &gt;&gt;</button>
+                <button id="disable-user-translation" class="secondary">&lt;&lt; Disable</button>
+              </div>
+              <div>
+                <h3>Translated Users</h3>
+                <select id="translated-users" multiple size="8"></select>
+              </div>
+            </div>
+            <div id="user-translation-status" class="hint"></div>
+          </section>
+        </section>
+
+        <section id="elevation-tab" class="hidden">
+          <div id="elevation-license-warning" class="license-warning hidden">
+            AI Elevation is not included in your license plan. Contact your administrator to upgrade.
+          </div>
+          <section class="card">
+            <div class="header">
+              <div>
+                <h2>AI Elevation Rules</h2>
+                <p>Create rules to monitor transmissions and automatically route matching messages to designated recipients.</p>
+              </div>
+              <div class="filter-row">
+                <button id="refresh-elevation" class="secondary">Refresh</button>
+              </div>
+            </div>
+            <div id="elevation-status" class="hint"></div>
+          </section>
+
+          <section class="card">
+            <h2>Cost Calculator</h2>
+            <p class="hint">$1/month per active rule.</p>
+            <div id="elevation-cost-calculator" style="margin-top: 1rem; padding: 1rem; background: #1a1a2e; border-radius: 8px;">
+              <div id="elevation-cost-breakdown" style="font-size: 14px; margin-bottom: 0.5rem; line-height: 1.6;"></div>
+              <div style="font-size: 24px; font-weight: bold; color: #22c55e;">
+                $<span id="elevation-cost-monthly">0.00</span>/month
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Create Elevation Rule</h2>
+            <div class="grid">
+              <label>
+                Rule Name
+                <input id="elevation-rule-name" type="text" placeholder="Emergency escalation" />
+              </label>
+              <label>
+                Monitor Source
+                <select id="elevation-source-type">
+                  <option value="ALL">All transmissions</option>
+                  <option value="GROUPS">Specific groups</option>
+                  <option value="USERS">Specific users</option>
+                </select>
+              </label>
+            </div>
+            <div id="elevation-source-selector" class="hidden" style="margin-top: 1rem;">
+              <label>
+                Select Sources
+                <select id="elevation-source-ids" multiple size="5"></select>
+              </label>
+              <p class="hint">Hold Ctrl/Cmd to select multiple.</p>
+            </div>
+            <div style="margin-top: 1rem;">
+              <label>
+                Condition (AI will match transmissions against this description)
+                <textarea id="elevation-condition" rows="3" placeholder="Mentions emergency, injury, fire, or requests immediate assistance"></textarea>
+              </label>
+            </div>
+            <div style="margin-top: 1rem;">
+              <label>Route to Destinations</label>
+              <div id="elevation-dest-container" class="assignment-grid" style="margin-top: 0.5rem;">
+                <div>
+                  <div class="row" style="margin-bottom: 0.5rem;">
+                    <button type="button" id="elevation-dest-show-groups" class="small">Groups</button>
+                    <button type="button" id="elevation-dest-show-users" class="small secondary">Users</button>
+                  </div>
+                  <select id="elevation-dest-available" multiple size="6"></select>
+                </div>
+                <div class="assignment-actions">
+                  <button type="button" id="elevation-dest-add">Add &gt;&gt;</button>
+                  <button type="button" id="elevation-dest-remove" class="secondary">&lt;&lt; Remove</button>
+                </div>
+                <div>
+                  <h3>Selected Destinations</h3>
+                  <select id="elevation-dest-selected" multiple size="6"></select>
+                </div>
+              </div>
+              <p class="hint">Toggle Groups/Users on the left, then add to destinations on the right.</p>
+            </div>
+            <div class="row" style="margin-top: 1rem;">
+              <button id="create-elevation-rule">Create Rule</button>
+              <div id="create-elevation-status" class="hint"></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="header">
+              <h2>Active Rules</h2>
+              <div class="filter-row">
+                <select id="elevation-rule-type-filter">
+                  <option value="ALL">All Rules</option>
+                  <option value="TENANT">Tenant Rules</option>
+                  <option value="BOLO">BOLO Rules</option>
+                </select>
+              </div>
+            </div>
+            <div id="elevation-rules-list" class="tenant-list"></div>
+          </section>
+        </section>
+
+        <section id="api-keys-tab" class="hidden">
+          <section class="card">
+            <div class="header">
+              <div>
+                <h2>API Keys</h2>
+                <p>Generate API keys for third-party integrations to access tenant data and management functions.</p>
+              </div>
+              <div class="filter-row">
+                <button id="refresh-api-keys" class="secondary">Refresh</button>
+              </div>
+            </div>
+            <div id="api-keys-status" class="hint"></div>
+          </section>
+
+          <section class="card">
+            <h2>Create API Key</h2>
+            <div class="grid">
+              <label>
+                Key Name
+                <input id="api-key-name" type="text" placeholder="Integration name" />
+              </label>
+              <label>
+                Expires
+                <select id="api-key-expiry">
+                  <option value="">Never</option>
+                  <option value="30">30 days</option>
+                  <option value="90">90 days</option>
+                  <option value="180">180 days</option>
+                  <option value="365">1 year</option>
+                </select>
+              </label>
+            </div>
+            <div style="margin-top: 1rem;">
+              <label>Permissions</label>
+              <div id="api-key-permissions" class="assignment-grid" style="margin-top: 0.5rem;">
+                <div>
+                  <h3>Available</h3>
+                  <select id="api-key-available-perms" multiple size="10"></select>
+                </div>
+                <div class="assignment-actions">
+                  <button type="button" id="api-key-add-perm">Add &gt;&gt;</button>
+                  <button type="button" id="api-key-remove-perm" class="secondary">&lt;&lt; Remove</button>
+                  <button type="button" id="api-key-add-all" class="small secondary" style="margin-top: 1rem;">Add All</button>
+                </div>
+                <div>
+                  <h3>Selected</h3>
+                  <select id="api-key-selected-perms" multiple size="10"></select>
+                </div>
+              </div>
+            </div>
+            <div class="row" style="margin-top: 1rem;">
+              <button id="create-api-key">Create API Key</button>
+              <div id="create-api-key-status" class="hint"></div>
+            </div>
+          </section>
+
+          <section id="api-key-created-card" class="card hidden">
+            <h2>API Key Created</h2>
+            <div class="hint" style="margin-bottom: 1rem; padding: 0.75rem; background: #1a1a2e; border-radius: 6px; border-left: 3px solid #eab308;">
+              <strong>Important:</strong> Copy this key now. You won't be able to see it again.
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <input id="api-key-created-value" type="text" readonly style="flex: 1; font-family: monospace;" />
+              <button id="api-key-copy" class="secondary">Copy</button>
+            </div>
+            <div class="row" style="margin-top: 1rem;">
+              <button id="api-key-dismiss">Done</button>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="header">
+              <h2>Keys</h2>
+              <div class="filter-row">
+                <select id="api-key-status-filter">
+                  <option value="ALL">All statuses</option>
+                  <option value="ACTIVE" selected>Active only</option>
+                  <option value="REVOKED">Revoked only</option>
+                  <option value="EXPIRED">Expired only</option>
+                </select>
+              </div>
+            </div>
+            <div id="api-keys-list" class="tenant-list"></div>
+          </section>
+        </section>
+
+        <section id="billing-tab" class="hidden">
+          <section class="card">
+            <div class="header">
+              <div>
+                <h2>Cost Summary</h2>
+                <p>Overview of estimated monthly costs for your tenant.</p>
+              </div>
+              <div class="filter-row">
+                <button id="refresh-billing" class="secondary">Refresh</button>
+              </div>
+            </div>
+            <div id="billing-status" class="hint"></div>
+          </section>
+
+          <section class="card">
+            <h2>Monthly Cost Breakdown</h2>
+            <div id="billing-breakdown" style="margin-top: 1rem;">
+              <div class="billing-line-item" style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #374151;">
+                <div>
+                  <strong>Users</strong>
+                  <div id="billing-users-detail" class="hint" style="font-size: 12px; margin-top: 0.25rem;"></div>
+                </div>
+                <div id="billing-users-cost" style="font-weight: bold; color: #22c55e;">$0.00</div>
+              </div>
+              <div class="billing-line-item" style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #374151;">
+                <div>
+                  <strong>Transcription</strong>
+                  <div id="billing-transcription-detail" class="hint" style="font-size: 12px; margin-top: 0.25rem;"></div>
+                </div>
+                <div id="billing-transcription-cost" style="font-weight: bold; color: #22c55e;">$0.00</div>
+              </div>
+              <div class="billing-line-item" style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #374151;">
+                <div>
+                  <strong>Translation</strong>
+                  <div id="billing-translation-detail" class="hint" style="font-size: 12px; margin-top: 0.25rem;"></div>
+                </div>
+                <div id="billing-translation-cost" style="font-weight: bold; color: #22c55e;">$0.00</div>
+              </div>
+              <div class="billing-line-item" style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #374151;">
+                <div>
+                  <strong>AI Elevation Rules</strong>
+                  <div id="billing-elevation-detail" class="hint" style="font-size: 12px; margin-top: 0.25rem;"></div>
+                </div>
+                <div id="billing-elevation-cost" style="font-weight: bold; color: #22c55e;">$0.00</div>
+              </div>
+              <div class="billing-line-item" style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #374151;">
+                <div>
+                  <strong>Data Retention</strong>
+                  <div id="billing-retention-detail" class="hint" style="font-size: 12px; margin-top: 0.25rem;"></div>
+                </div>
+                <div id="billing-retention-cost" style="font-weight: bold; color: #22c55e;">$0.00</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h2 style="margin: 0;">Estimated Monthly Total</h2>
+                <p class="hint" style="margin-top: 0.5rem;">Based on current configuration and usage.</p>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 36px; font-weight: bold; color: #22c55e;">
+                  $<span id="billing-total">0.00</span>
+                </div>
+                <div class="hint">per month</div>
+              </div>
+            </div>
+          </section>
+        </section>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

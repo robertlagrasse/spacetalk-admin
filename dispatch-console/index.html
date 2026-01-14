@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spacetalk Dispatch Console</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div>
+          <h1>Spacetalk Dispatch Console</h1>
+          <p id="tenant-info" class="hint"></p>
+        </div>
+        <div id="header-controls" class="row hidden">
+          <span id="dispatcher-name" class="hint"></span>
+          <label style="flex-direction: row; align-items: center; gap: 0.5rem;">
+            <span>Language:</span>
+            <select id="language-select">
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+              <option value="pt">Português</option>
+              <option value="zh">中文</option>
+              <option value="ja">日本語</option>
+              <option value="ko">한국어</option>
+              <option value="ar">العربية</option>
+              <option value="hi">हिन्दी</option>
+            </select>
+          </label>
+          <label style="flex-direction: row; align-items: center; gap: 0.5rem;">
+            <span>Elevation Alert:</span>
+            <select id="alert-tone-select">
+              <option value="none">None</option>
+              <option value="chime">Chime</option>
+              <option value="alert">Alert</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </label>
+          <button id="bolo-btn" class="bolo-btn">BOLO</button>
+          <button id="logout" class="secondary">Sign Out</button>
+        </div>
+      </header>
+
+      <section id="login-panel" class="card">
+        <h2>Dispatcher Sign In</h2>
+        <div class="grid">
+          <label>
+            API Base URL
+            <input id="api-base-url" type="text" />
+          </label>
+          <label>
+            Email
+            <input id="dispatcher-email" type="email" placeholder="dispatcher@tenant.com" />
+          </label>
+          <label>
+            Password
+            <input id="dispatcher-password" type="password" placeholder="Temporary password" />
+          </label>
+        </div>
+        <div class="row">
+          <button id="login">Sign In</button>
+          <div id="login-status" class="hint"></div>
+        </div>
+      </section>
+
+      <section id="app-panel" class="hidden">
+        <div class="dispatch-layout">
+          <section class="map-panel">
+            <div class="panel-header">
+              <h2>User Locations</h2>
+              <div class="row">
+                <button id="refresh-locations" class="secondary small">Refresh</button>
+              </div>
+            </div>
+            <div class="map-filter-controls">
+              <div class="row">
+                <div class="toggle-group">
+                  <button id="map-filter-all" class="toggle-btn active">All Users</button>
+                  <button id="map-filter-channel" class="toggle-btn">Channel</button>
+                  <button id="map-filter-user" class="toggle-btn">User</button>
+                </div>
+              </div>
+              <div class="row">
+                <label id="map-channel-label" class="hidden">
+                  <select id="map-channel-select">
+                    <option value="">Select channel...</option>
+                  </select>
+                </label>
+                <label id="map-user-label" class="hidden">
+                  <select id="map-user-select">
+                    <option value="">Select user...</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+            <div id="locate-status" class="hint"></div>
+            <div id="locate-legend" class="legend">
+              <span><span class="dot green"></span> Available</span>
+              <span><span class="dot orange"></span> Busy</span>
+              <span><span class="dot red"></span> Do Not Disturb</span>
+              <span><span class="dot gray"></span> Offline</span>
+            </div>
+            <div id="locate-map"></div>
+          </section>
+
+          <section class="transmissions-panel">
+            <div class="panel-header">
+              <h2>Live Transmissions</h2>
+              <div class="row">
+                <button id="refresh-transmissions" class="secondary small">Refresh</button>
+              </div>
+            </div>
+
+            <div class="send-controls">
+              <div class="row">
+                <div class="toggle-group">
+                  <button id="send-mode-channel" class="toggle-btn active">Channel</button>
+                  <button id="send-mode-user" class="toggle-btn">User</button>
+                  <button id="send-mode-broadcast" class="toggle-btn">All Users</button>
+                </div>
+              </div>
+              <div class="row">
+                <label id="channel-label">
+                  Channel
+                  <select id="channel-select">
+                    <option value="">Select channel...</option>
+                  </select>
+                </label>
+                <label id="user-label" class="hidden">
+                  User
+                  <select id="user-select">
+                    <option value="">Select user...</option>
+                  </select>
+                </label>
+              </div>
+              <div class="row">
+                <input id="text-message" type="text" placeholder="Type a message..." />
+                <label class="checkbox-inline">
+                  <input type="checkbox" id="send-as-voice" />
+                  <span>Send as voice</span>
+                </label>
+                <button id="send-text" class="secondary">Send</button>
+              </div>
+              <div class="row">
+                <button id="ptt-button" class="ptt-button">
+                  <span class="ptt-icon"></span>
+                  <span class="ptt-label">Push to Talk</span>
+                </button>
+                <span id="ptt-status" class="hint"></span>
+              </div>
+            </div>
+
+            <div class="filter-controls">
+              <label class="checkbox-label">
+                <input type="checkbox" id="filter-own" checked />
+                <span>Show my messages</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="filter-other-dms" checked />
+                <span>Show other users' DMs</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="filter-text" checked />
+                <span>Show text messages</span>
+              </label>
+              <div class="toggle-group small">
+                <button id="view-summary" class="toggle-btn active">Summary</button>
+                <button id="view-transcript" class="toggle-btn">Transcript</button>
+              </div>
+            </div>
+
+            <div id="transmission-status" class="hint"></div>
+            <div id="transmission-list" class="transmission-list"></div>
+            <div class="row">
+              <button id="load-more" class="secondary" style="display: none;">Load More</button>
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>
+
+    <!-- BOLO Modal -->
+    <div id="bolo-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>BOLO - Be On the Lookout</h2>
+          <button id="bolo-close" class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="hint">Set an alert to monitor transmissions from specific groups. Matching messages will be routed directly to you.</p>
+
+          <div id="bolo-current" class="bolo-current hidden">
+            <h3>Current BOLO</h3>
+            <div id="bolo-current-details"></div>
+            <div class="row" style="margin-top: 0.5rem;">
+              <button id="bolo-clear" class="secondary small">Clear BOLO</button>
+            </div>
+          </div>
+
+          <div id="bolo-form">
+            <label>
+              Monitor Groups
+              <select id="bolo-groups" multiple size="5"></select>
+            </label>
+            <p class="hint">Hold Ctrl/Cmd to select multiple groups.</p>
+
+            <label style="margin-top: 1rem;">
+              Condition (what to look for)
+              <textarea id="bolo-condition" rows="3" placeholder="Mentions suspect description, vehicle, location, or emergency situation"></textarea>
+            </label>
+
+            <div class="row" style="margin-top: 1rem;">
+              <button id="bolo-save">Set BOLO</button>
+              <div id="bolo-status" class="hint"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
